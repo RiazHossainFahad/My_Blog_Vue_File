@@ -2,13 +2,13 @@
     <div class="container">
         <div class="form-section">
             <h4 class="add-blog">Add Blog</h4>
-            <form class="form">
+            <form class="form" id="myForm" method="POST" enctype="multipart/form">
                 Title
-                <input type="text" v-model="title" placeholder="Title">
+                <input type="text" id="title" v-model="title" placeholder="Title">
                 Body
-                <textarea v-model="body" cols="30" rows="5"></textarea>
+                <textarea id="body" v-model="body" cols="30" rows="5"></textarea>
                 Banner
-                <input type="file" @change="processFile($event)">
+                <input type="file" id="file" ref="file" @change="processFile($event)">
                 <div class="btn-right">
                     <button @click.prevent="sendData" class="btn">Add Blog</button>
                 </div>
@@ -37,29 +37,32 @@ export default {
       title: '',
       body: '',
       img: '',
+      file: '',
     };
   },
   methods: {
+    handleFileUpload() {
+      // {this.file} = this.$refs.file.files[0];
+    },
     processFile(event) {
       this.img = URL.createObjectURL(event.target.files[0]);
+      this.file = this.$refs.file.files[0];
     },
     sendData() {
       if (this.img === '' || this.title === '' || this.body === '') {
-        alert('Ooppss!! Empty Post!!');
+        console.log('Ooppss!! Empty Post!!');
       } else {
-        this.$store.dispatch('setPosts',
-          {
-            title: this.title,
-            body: this.body,
-            img: this.img,
-          })
-          .then((res) => {
-            console.log(res.data);
-            alert('Your post is suceessfull');
-            this.title = '';
-            this.body = '';
-            this.img = '';
-          });
+        // const data = document.getElementById('myForm');
+        const formData = new FormData();
+        formData.append('url', this.file);
+        formData.append('title', this.title);
+        formData.append('body', this.body);
+        // const obj = {
+        //   title: this.title,
+        //   body: this.body,
+        //   url: this.imgUrl,
+        // };
+        this.$store.dispatch('setPosts', formData);
       }
     },
   },
